@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Report>
+  <Application>
+    <Parts>
+      <Part name="Adaptation" status="Undefined" symbol="Adapt"/>
+      <Part name="Supplier" status="Frozen" symbol="Supp"/>
+      <Part name="OEM" status="Protected" symbol="OEM"/>
+      <Part name="Default" status="Undefined" symbol="Default"/>
+    </Parts>
+    <Functions>
+      <Function component="Supp" name="f12_impl" part="Supp">
+        <Access accessType="READ" multiplicity="1" name="bC" protection="READY"/>
+        <Access accessType="WRITE" multiplicity="1" name="eC" protection="READY"/>
+      </Function>
+      <Function component="Supp" name="f3_impl" part="Supp">
+        <Access accessType="READ" multiplicity="1" name="dD" protection="READY"/>
+        <Call name="updateA"/>
+      </Function>
+      <Function component="Supp" name="f4_impl" part="Supp">
+        <Access accessType="READ" multiplicity="1" name="aC" protection="READY"/>
+        <Access accessType="WRITE" multiplicity="1" name="bC" protection="READY"/>
+        <Access accessType="READ" multiplicity="1" name="eC" protection="READY"/>
+      </Function>
+      <Function component="OEM" name="f6_impl" part="OEM">
+        <Access accessType="WRITE" multiplicity="1" name="cD" protection="READY"/>
+        <Access accessType="READ" multiplicity="1" name="dD" protection="READY"/>
+      </Function>
+      <Function component="OEM" name="f8_impl" part="OEM">
+        <Access accessType="READ" multiplicity="1" name="cD" protection="READY"/>
+        <Access accessType="WRITE" multiplicity="1" name="dD" protection="READY"/>
+        <Call name="updateA"/>
+      </Function>
+      <Function component="Supp" name="updateA" part="Supp">
+        <Access accessType="WRITE" multiplicity="1" name="aC" protection="READY"/>
+        <Access accessType="READ" multiplicity="1" name="aC" protection="READY"/>
+      </Function>
+    </Functions>
+    <Datas>
+      <Data category="SCALAR" name="aC" numDimensions="-1" numElements="-1" part="Supp" size="16" type="u16"/>
+      <Data category="ARRAY" name="bC" numDimensions="1" numElements="2" part="Supp" size="16" type="u8"/>
+      <Data category="SCALAR" name="cD" numDimensions="0" numElements="-1" part="OEM" size="8" type="u8"/>
+      <Data category="ARRAY" name="dD" numDimensions="2" numElements="4" part="OEM" size="128" type="s16"/>
+      <Data category="ARRAY" name="eC" numDimensions="1" numElements="8" part="Supp" size="256" type="u32"/>
+    </Datas>
+  </Application>
+  <LET>
+    <Target clockFrequency_MHz="0" cores="3" name="Aurix" osType="OSEK" type="ECU">
+      <Core name="A0" unit="us"/>
+      <Core name="A1" unit="us"/>
+      <Core name="A2" unit="us"/>
+    </Target>
+    <TDLProgram name="Program">
+      <TDLTask name="T03">
+        <Function index="0" name="f3_impl"/>
+      </TDLTask>
+      <TDLTask name="T04">
+        <Function index="0" name="f4_impl"/>
+      </TDLTask>
+      <TDLTask name="T06">
+        <Function index="0" name="f6_impl"/>
+      </TDLTask>
+      <TDLTask name="T08">
+        <Function index="0" name="f8_impl"/>
+      </TDLTask>
+      <TDLTask name="T12">
+        <Function index="0" name="f12_impl"/>
+      </TDLTask>
+      <Module name="ModuleA0">
+        <Mode initial="true" name="Mode0" period="24" unit="ms">
+          <Invocation LET="1" offset="1" period="3" task="T03"/>
+          <Invocation LET="2" offset="1" period="4" task="T04"/>
+        </Mode>
+      </Module>
+      <Module name="ModuleA1">
+        <Mode initial="true" name="Mode0" period="24" unit="ms">
+          <Invocation LET="2" offset="2" period="6" task="T06"/>
+          <Invocation LET="3" offset="3" period="8" task="T08"/>
+        </Mode>
+      </Module>
+      <Module name="ModuleA2">
+        <Mode initial="true" name="Mode0" period="24" unit="ms">
+          <Invocation LET="4" offset="7" period="12" task="T12"/>
+        </Mode>
+      </Module>
+    </TDLProgram>
+    <TDLMapping program="Program" target="Aurix">
+      <CoreMapping core="A0" modules="ModuleA0"/>
+      <CoreMapping core="A1" modules="ModuleA1"/>
+      <CoreMapping core="A2" modules="ModuleA2"/>
+    </TDLMapping>
+  </LET>
+  <Buffering>
+    <BufferImplementations>
+      <BufferImplementation category="SCALAR" name="cD_T06" needsDirtyFlag="false" numDimensions="0" numElements="-1" part="OEM" size="8" type="u8"/>
+      <BufferImplementation category="SCALAR" name="cD_T08" needsDirtyFlag="false" numDimensions="0" numElements="-1" part="OEM" size="8" type="u8"/>
+      <BufferImplementation category="SCALAR" name="aC_T03" needsDirtyFlag="true" numDimensions="-1" numElements="-1" part="Supp" size="16" type="u16"/>
+      <BufferImplementation category="SCALAR" name="aC_T04" needsDirtyFlag="true" numDimensions="-1" numElements="-1" part="Supp" size="16" type="u16"/>
+      <BufferImplementation category="SCALAR" name="aC_T08" needsDirtyFlag="true" numDimensions="-1" numElements="-1" part="Supp" size="16" type="u16"/>
+      <BufferImplementation category="ARRAY" name="bC_T04" needsDirtyFlag="false" numDimensions="1" numElements="2" part="Supp" size="16" type="u8"/>
+      <BufferImplementation category="ARRAY" name="dD_T08" needsDirtyFlag="false" numDimensions="2" numElements="4" part="OEM" size="128" type="s16"/>
+      <BufferImplementation category="ARRAY" name="eC_T12" needsDirtyFlag="false" numDimensions="1" numElements="8" part="Supp" size="256" type="u32"/>
+    </BufferImplementations>
+    <BufferRequirements>
+      <BufferRequirement mappedTo="aC_T03" task="T03" type="OUT" var="aC"/>
+      <BufferRequirement mappedTo="aC_T04" task="T04" type="IN" var="aC"/>
+      <BufferRequirement mappedTo="bC_T04" task="T04" type="OUT" var="bC"/>
+      <BufferRequirement mappedTo="cD_T06" task="T06" type="OUT" var="cD"/>
+      <BufferRequirement mappedTo="aC_T08" task="T08" type="IN" var="aC"/>
+      <BufferRequirement mappedTo="cD_T08" task="T08" type="IN" var="cD"/>
+      <BufferRequirement mappedTo="dD_T08" task="T08" type="OUT" var="dD"/>
+      <BufferRequirement mappedTo="eC_T12" task="T12" type="OUT" var="eC"/>
+    </BufferRequirements>
+  </Buffering>
+</Report>
